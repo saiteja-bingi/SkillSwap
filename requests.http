@@ -1,0 +1,23 @@
+### Register User
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+    "name":"Sai Teja",
+    "email": "[EMAIL_ADDRESS]",
+    "password":"123456"
+}
+
+
+### Login User
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "[EMAIL_ADDRESS]",
+  "password": "123456"
+}
+
+### Get Profile
+GET http://localhost:5000/api/auth/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZTIxMTJhNGIzOWFmODAzZjUxOGU1YiIsImlhdCI6MTc3NjQzNjczNiwiZXhwIjoxNzc3MDQxNTM2fQ.w8F4iDSpmAsP_HRSPs3qdSYYLGQkpvfX4HzamFB_790

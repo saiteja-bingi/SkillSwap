@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
 
 // load env variables
 dotenv.config();
@@ -16,6 +17,9 @@ app.use(express.json());
 
 // cors helps to connect frontend and backend
 app.use(cors());
+
+// routes
+app.use("/api/auth",authRoutes);
 
 app.get("/",(req,res)=>{
     res.send("SkillSwap API is running...")
