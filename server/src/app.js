@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 
 // load env variables
 dotenv.config();
@@ -20,6 +21,7 @@ app.use(cors());
 
 // routes
 app.use("/api/auth",authRoutes);
+app.use("/api/posts",postRoutes);
 
 app.get("/",(req,res)=>{
     res.send("SkillSwap API is running...")
