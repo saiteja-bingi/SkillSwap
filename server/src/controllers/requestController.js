@@ -1,6 +1,6 @@
 import Request from "../models/Request.js";
 import Post from "../models/Post.js";
-
+import Conversation from "../models/Conversation.js";
 // send request
 export const sendRequest=async(req,res)=>{
     try {
@@ -96,7 +96,7 @@ export const acceptRequest=async(req,res)=>{
         }
 
         // check if user is receiver
-        if(request.receiver.toString()!==req.user.id){
+        if(request.receiver.toString()!==req.user._id.toString()){
             return res.status(403).json({
                 message:"You are not allowed to accept this request"
             });
@@ -113,10 +113,17 @@ export const acceptRequest=async(req,res)=>{
         request.status="accepted";
         await request.save();
 
+        // create conversation automatically
+        const conversation =await Conversation.create({
+            participants:[request.sender,request.receiver],
+            request:request._id
+        });
+
         // send success response
         res.status(200).json({
-            message:"Request accepted successfully",
-            request
+            message:"Request accepted and chat created",
+            request,
+            conversation
         });
 
     }

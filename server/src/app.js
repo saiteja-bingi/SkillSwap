@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 
 // load env variables
 dotenv.config();
@@ -24,6 +25,7 @@ app.use(cors());
 app.use("/api/auth",authRoutes);
 app.use("/api/posts",postRoutes);
 app.use("/api/requests",requestRoutes);
+app.use("/api/chat",chatRoutes);
 
 app.get("/",(req,res)=>{
     res.send("SkillSwap API is running...")
