@@ -28,7 +28,7 @@ export const createPost=async(req,res)=>{
 export const getAllPosts=async(req,res)=>{
     try{
         // get search text from url
-        const {search,status,skillWanted,skillOffered} =req.query;
+        const {search,status,skillWanted,skillOffered,page=1,limit=5} =req.query;
         
         // create empty filter object
         let filter={};
@@ -65,12 +65,27 @@ export const getAllPosts=async(req,res)=>{
             }
         }
 
-        // find posts using filter
+        // convert page and limit to numbers
+        const pageNumber=Number(page);
+        const limitNumber=Number(limit);
+
+        // skip formula
+        const skip=(pageNumber-1)*limitNumber;
+
+        // Get paginated posts
         const posts=await Post.find(filter)
         .populate("createdBy","name email")
-        .sort({createdAt:-1});
+        .sort({createdAt:-1})
+        .skip(skip)
+        .limit(limitNumber);
+
+        // total Matching posts
+        const totalPosts=await Post.countDocuments(filter);
 
         res.status(200).json({
+            currentPage:pageNumber,
+            totalPages:Math.ceil(totalPosts/limitNumber),
+            totalPosts,
             count:posts.length,
             posts
         });
