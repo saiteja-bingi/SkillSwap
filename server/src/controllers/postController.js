@@ -28,7 +28,7 @@ export const createPost=async(req,res)=>{
 export const getAllPosts=async(req,res)=>{
     try{
         // get search text from url
-        const {search} =req.query;
+        const {search,status,skillWanted,skillOffered} =req.query;
         
         // create empty filter object
         let filter={};
@@ -43,6 +43,26 @@ export const getAllPosts=async(req,res)=>{
                     {skillWanted:{$regex:search,$options:"i"}}
                 ]
             };
+        }
+        // filter by status
+        if(status){
+            filter.status=status;
+        }
+
+        // filter by skillWanted
+        if(skillWanted){
+            filter.skillWanted={
+                $regex:skillWanted,
+                $options:"i"
+            }
+        }
+
+        // filter by skillOffered
+        if(skillOffered){
+            filter.skillOffered={
+                $regex:skillOffered,
+                $options:"i"
+            }
         }
 
         // find posts using filter
