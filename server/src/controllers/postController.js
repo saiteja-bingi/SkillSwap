@@ -27,11 +27,33 @@ export const createPost=async(req,res)=>{
 // Get all posts
 export const getAllPosts=async(req,res)=>{
     try{
-        const posts=await Post.find()
+        // get search text from url
+        const {search} =req.query;
+        
+        // create empty filter object
+        let filter={};
+
+        // if user typed search text
+        if(search){
+            filter={
+                $or:[
+                    {title:{$regex:search,$options:"i"}},
+                    {description:{$regex:search,$options:"i"}},
+                    {skillOffered:{$regex:search,$options:"i"}},
+                    {skillWanted:{$regex:search,$options:"i"}}
+                ]
+            };
+        }
+
+        // find posts using filter
+        const posts=await Post.find(filter)
         .populate("createdBy","name email")
         .sort({createdAt:-1});
 
-        res.status(200).json(posts);
+        res.status(200).json({
+            count:posts.length,
+            posts
+        });
     }
     catch(error){
         res.status(500).json({
