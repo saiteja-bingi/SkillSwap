@@ -28,7 +28,15 @@ export const createPost=async(req,res)=>{
 export const getAllPosts=async(req,res)=>{
     try{
         // get search text from url
-        const {search,status,skillWanted,skillOffered,page=1,limit=5} =req.query;
+        const {
+            search,
+            status,
+            skillWanted,
+            skillOffered,
+            page=1,
+            limit=5,
+            sort="latest"
+        } =req.query;
         
         // create empty filter object
         let filter={};
@@ -72,10 +80,30 @@ export const getAllPosts=async(req,res)=>{
         // skip formula
         const skip=(pageNumber-1)*limitNumber;
 
+        // soting logic
+
+        let sortOption = { createdAt: -1 };
+        // Latest first
+        if (sort === "latest") {
+        sortOption = { createdAt: -1 };
+        }
+        // Oldest first
+        if (sort === "oldest") {
+        sortOption = { createdAt: 1 };
+        }
+        // Title A to Z
+        if (sort === "az") {
+        sortOption = { title: 1 };
+        }
+        // Title Z to A
+        if (sort === "za") {
+        sortOption = { title: -1 };
+        }
+
         // Get paginated posts
         const posts=await Post.find(filter)
         .populate("createdBy","name email")
-        .sort({createdAt:-1})
+        .sort(sortOption)
         .skip(skip)
         .limit(limitNumber);
 
