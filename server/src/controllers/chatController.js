@@ -1,5 +1,6 @@
 import Conversation from "../models/Conversation.js";
 import Message from "../models/Message.js";
+import Notification from "../models/Notification.js";
 
 export const sendMessage=async(req,res)=>{
     try{
@@ -36,6 +37,16 @@ export const sendMessage=async(req,res)=>{
             conversation:conversationId,
             sender:req.user._id,
             text
+        });
+
+        const otheriUser=conversation.participants.find(
+            userId=>userId.toString()!==req.user._id.toString()
+        );
+
+        // create notification for other user
+        await Notification.create({
+            user:otheriUser,
+            message:`${req.user.name} sent you a message`
         });
 
         // success response

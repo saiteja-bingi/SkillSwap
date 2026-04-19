@@ -1,6 +1,8 @@
 import Request from "../models/Request.js";
 import Post from "../models/Post.js";
 import Conversation from "../models/Conversation.js";
+import Notification from "../models/Notification.js";
+
 // send request
 export const sendRequest=async(req,res)=>{
     try {
@@ -33,12 +35,19 @@ export const sendRequest=async(req,res)=>{
                 message:"request already sent"
             }); 
         }
-
+        
+        // create request
         const request=await Request.create({
             post:postId,
             sender:req.user._id,
             receiver:post.createdBy,
             message
+        });
+
+        // create notification for receiver
+        await Notification.create({
+            user:post.createdBy,
+            message:`${req.user.name} sent you a skill swap request`
         });
 
         res.status(201).json({
@@ -112,6 +121,12 @@ export const acceptRequest=async(req,res)=>{
         // accept request
         request.status="accepted";
         await request.save();
+
+        // create notification for sender
+        await Notification.create({
+            user:request.sender,
+            message:`${req.user.name} accepted your skill swap request`
+        });
 
         // create conversation automatically
         const conversation =await Conversation.create({
