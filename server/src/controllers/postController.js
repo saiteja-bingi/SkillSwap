@@ -34,7 +34,7 @@ export const getAllPosts=async(req,res)=>{
             skillWanted,
             skillOffered,
             page=1,
-            limit=100,
+            limit=6,
             sort="latest"
         } =req.query;
         
