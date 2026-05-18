@@ -4,7 +4,7 @@ A modern full-stack MERN application where users can exchange skills, connect wi
 
 ## Live Demo
 
-Frontend: https://skillswap-hub.vercel.app
+Frontend: https://skill-swap-ten-vert.vercel.app
 
 Backend API: https://skillswap-zrev.onrender.com
 
