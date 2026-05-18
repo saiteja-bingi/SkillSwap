@@ -58,3 +58,18 @@ export const markAsread=async(req,res)=>{
         });
     }
 }
+
+// clear all notifications
+export const clearAllNotifications=async(req,res)=>{
+    try{
+        await Notification.deleteMany({user:req.user._id});
+        res.status(200).json({
+            message:"All notifications cleared"
+        });
+    }
+    catch(error){
+        res.status(500).json({
+            message:error.message
+        });
+    }
+}

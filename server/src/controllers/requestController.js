@@ -23,11 +23,10 @@ export const sendRequest=async(req,res)=>{
             });
         }
 
-        // check duplicate pending request
+        // check duplicate request
         const existingRequest=await Request.findOne({
             post:postId,
-            sender:req.user._id,
-            status:"pending"
+            sender:req.user._id
         });
 
         if(existingRequest){
