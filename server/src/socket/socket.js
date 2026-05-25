@@ -37,22 +37,27 @@ export const initializeSocket = (server) => {
 
             try {
 
+                console.log("Incoming Message:", data);
+
+                // save message in database
                 const newMessage = await Message.create({
                     conversation: data.conversationId,
                     sender: data.senderId,
                     text: data.text
                 });
 
+                // populate sender details
                 const populatedMessage =
                     await newMessage.populate(
                         "sender",
                         "name profilepic"
                     );
 
+                // get receiver socket
                 const receiverSocketId =
                     onlineUsers[data.receiverId];
 
-                // send only to receiver
+                // send to receiver
                 if (receiverSocketId) {
 
                     io.to(receiverSocketId).emit(
@@ -60,6 +65,12 @@ export const initializeSocket = (server) => {
                         populatedMessage
                     );
                 }
+
+                // send back to sender
+                socket.emit(
+                    "receive_message",
+                    populatedMessage
+                );
 
             } catch (error) {
 
