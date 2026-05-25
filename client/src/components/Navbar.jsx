@@ -2,7 +2,18 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import api from "../services/api";
-import { LogOut, Home, Grid, MessageSquare, LayoutDashboard, Handshake, Bell } from "lucide-react";
+import socket from "../services/socket";
+import { 
+  LogOut, 
+  Home, 
+  Grid, 
+  MessageSquare, 
+  LayoutDashboard, 
+  Handshake, 
+  Bell,
+  Menu,
+  X
+} from "lucide-react";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -11,8 +22,17 @@ function Navbar() {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
   const dropdownRef = useRef(null);
   const profileRef = useRef(null);
+
+  // Request browser Notification permissions
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -27,6 +47,7 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Fetch initial notifications
   useEffect(() => {
     if (user) {
       async function fetchNotifications() {
@@ -40,6 +61,41 @@ function Navbar() {
       fetchNotifications();
     }
   }, [user]);
+
+  // Socket notification listener: appends received messages as notifications when not on /messages page
+  useEffect(() => {
+    if (!user) return;
+
+    socket.connect();
+    socket.emit("register_user", user._id);
+
+    const handleReceiveMessageNotification = (data) => {
+      // Only notify if user is NOT currently on the Messages page and did not send it
+      if (location.pathname !== "/messages" && data.sender?._id !== user._id) {
+        const newNotif = {
+          _id: "notif-" + Date.now(),
+          message: `${data.sender?.name} sent you a message: "${data.text.substring(0, 30)}${data.text.length > 30 ? '...' : ''}"`,
+          isRead: false,
+          createdAt: new Date().toISOString()
+        };
+        setNotifications((prev) => [newNotif, ...prev]);
+
+        // Push desktop notification
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification(`New message from ${data.sender?.name || "SkillSwap"}`, {
+            body: data.text,
+            icon: "/favicon.ico"
+          });
+        }
+      }
+    };
+
+    socket.on("receive_message", handleReceiveMessageNotification);
+
+    return () => {
+      socket.off("receive_message", handleReceiveMessageNotification);
+    };
+  }, [user, location.pathname]);
 
   function handleLogout() {
     logout();
@@ -78,13 +134,19 @@ function Navbar() {
       background: isActive ? "rgba(139, 92, 246, 0.2)" : "transparent",
       color: isActive ? "var(--accent-primary)" : "var(--text-primary)",
       transition: "all 0.2s",
-      textDecoration: "none"
+      textDecoration: "none",
+      fontWeight: isActive ? "600" : "400"
     };
   };
 
+  const handleLinkClick = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
-    <nav className="glass-nav">
-      <Link to="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
+    <>
+      <nav className="glass-nav">
+      <Link to="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }} onClick={handleLinkClick}>
         <div style={{
           width: "40px", height: "40px", borderRadius: "10px",
           background: "linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))",
@@ -99,29 +161,40 @@ function Navbar() {
       </Link>
 
       <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-        <Link to="/" style={getLinkStyle("/")}>
-          <Home size={18} /> Home
-        </Link>
+        
+        {/* Desktop links - collapse on mobile */}
+        <div className="desktop-nav-menu">
+          <Link to="/" style={getLinkStyle("/")}>
+            <Home size={18} /> Home
+          </Link>
+          
+          {user && (
+            <>
+              <Link to="/feed" style={getLinkStyle("/feed")}>
+                <Grid size={18} /> Feed
+              </Link>
+              <Link to="/messages" style={getLinkStyle("/messages")}>
+                <MessageSquare size={18} /> Messages
+              </Link>
+              <Link to="/dashboard" style={getLinkStyle("/dashboard")}>
+                <LayoutDashboard size={18} /> Dashboard
+              </Link>
+            </>
+          )}
+        </div>
 
-        {!user ? (
-          <div style={{ display: "flex", gap: "10px", marginLeft: "10px" }}>
+        {/* Desktop Guest Auth - collapse on mobile */}
+        {!user && (
+          <div className="desktop-nav-menu" style={{ display: "flex", gap: "10px" }}>
             <Link to="/login" className="btn btn-secondary">Login</Link>
             <Link to="/register" className="btn btn-primary">Register</Link>
           </div>
-        ) : (
-          <>
-            <Link to="/feed" style={getLinkStyle("/feed")}>
-              <Grid size={18} /> Feed
-            </Link>
-            <Link to="/messages" style={getLinkStyle("/messages")}>
-              <MessageSquare size={18} /> Messages
-            </Link>
-            <Link to="/dashboard" style={getLinkStyle("/dashboard")}>
-              <LayoutDashboard size={18} /> Dashboard
-            </Link>
+        )}
 
-            {/* Notifications Dropdown */}
-            <div ref={dropdownRef} style={{ position: "relative", marginLeft: "10px" }}>
+        {user && (
+          <>
+            {/* Notifications Dropdown (Always visible) */}
+            <div ref={dropdownRef} style={{ position: "relative" }}>
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
                 style={{ 
@@ -186,8 +259,8 @@ function Navbar() {
               )}
             </div>
 
-            {/* Profile Dropdown */}
-            <div ref={profileRef} style={{ position: "relative", marginLeft: "10px" }}>
+            {/* Profile Dropdown (Always visible) */}
+            <div ref={profileRef} style={{ position: "relative" }}>
               <button 
                 onClick={() => setShowProfile(!showProfile)}
                 style={{ 
@@ -211,7 +284,9 @@ function Navbar() {
                 }}>
                   {user?.name ? String(user.name).charAt(0).toUpperCase() : 'U'}
                 </div>
-                <span style={{ fontWeight: "500" }}>{user?.name ? String(user.name).split(' ')[0] : 'Profile'}</span>
+                <span style={{ fontWeight: "500" }} className="desktop-nav-menu">
+                  {user?.name ? String(user.name).split(' ')[0] : 'Profile'}
+                </span>
               </button>
 
               {showProfile && (
@@ -239,7 +314,10 @@ function Navbar() {
                   </div>
                   
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      handleLogout();
+                      handleLinkClick();
+                    }}
                     className="btn btn-secondary w-full"
                     style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "0.75rem" }}
                   >
@@ -250,9 +328,68 @@ function Navbar() {
             </div>
           </>
         )}
+
+        {/* Mobile Hamburger Toggle Button */}
+        <button 
+          className="mobile-nav-toggle"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
     </nav>
-  );
+
+    {/* Mobile Navigation Drawer (Moved outside <nav> to avoid parent stacking context opacity/filter rendering bugs) */}
+    {mobileMenuOpen && (
+      <div className="mobile-drawer-overlay" onClick={() => setMobileMenuOpen(false)}></div>
+    )}
+    <div className={`mobile-drawer${mobileMenuOpen ? " open" : ""}`}>
+      <div className="mobile-drawer-header">
+        <h3 style={{ margin: 0, fontWeight: "800" }}>Navigation</h3>
+        <button 
+          className="mobile-drawer-close"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <X size={20} />
+        </button>
+      </div>
+      <div className="mobile-drawer-links">
+        <Link to="/" style={getLinkStyle("/")} onClick={handleLinkClick}>
+          <Home size={18} /> Home
+        </Link>
+        
+        {user ? (
+          <>
+            <Link to="/feed" style={getLinkStyle("/feed")} onClick={handleLinkClick}>
+              <Grid size={18} /> Feed
+            </Link>
+            <Link to="/messages" style={getLinkStyle("/messages")} onClick={handleLinkClick}>
+              <MessageSquare size={18} /> Messages
+            </Link>
+            <Link to="/dashboard" style={getLinkStyle("/dashboard")} onClick={handleLinkClick}>
+              <LayoutDashboard size={18} /> Dashboard
+            </Link>
+            <button
+              onClick={() => {
+                handleLogout();
+                handleLinkClick();
+              }}
+              className="btn btn-secondary w-full"
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "1.5rem" }}
+            >
+              <LogOut size={18} /> Logout
+            </button>
+          </>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "1rem" }}>
+            <Link to="/login" className="btn btn-secondary w-full" onClick={handleLinkClick}>Login</Link>
+            <Link to="/register" className="btn btn-primary w-full" onClick={handleLinkClick}>Register</Link>
+          </div>
+        )}
+      </div>
+    </div>
+  </>
+);
 }
 
 export default Navbar;

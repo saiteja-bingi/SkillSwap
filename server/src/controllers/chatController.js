@@ -72,7 +72,7 @@ export const getMyConversations=async(req,res)=>{
             participants:req.user._id
         })
         .populate("participants","name email")
-        .sort({updateAt:-1});
+        .sort({updatedAt:-1});
 
         // send result
         res.status(200).json({

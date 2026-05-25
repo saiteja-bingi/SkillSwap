@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 // register user
 export const registerUser=async(req,res)=>{
     try{
-        const {name,email,password}=req.body;
+        const {name,email,password,skillsOffered,skillsWanted}=req.body;
 
         // check existing users
         const existingUser=await User.findOne({email});
@@ -21,7 +21,9 @@ export const registerUser=async(req,res)=>{
         const user=await User.create({
             name,
             email,
-            password:hashedPassword
+            password:hashedPassword,
+            skillsOffered: skillsOffered || [],
+            skillsWanted: skillsWanted || []
         });
         res.status(201).json({
             message:"User registered successfully"
@@ -83,6 +85,31 @@ export const getProfile=async(req,res)=>{
     catch(error){
         res.status(500).json({
             message:error.messsage
+        });
+    }
+};
+
+// update user profile
+export const updateProfile=async(req,res)=>{
+    try{
+        const {name,skillsOffered,skillsWanted}=req.body;
+        const user=await User.findById(req.user._id);
+        if(!user){
+            return res.status(404).json({
+                message:"User not found"
+            });
+        }
+
+        if(name) user.name=name;
+        if(skillsOffered) user.skillsOffered=skillsOffered;
+        if(skillsWanted) user.skillsWanted=skillsWanted;
+
+        await user.save();
+        res.status(200).json(user);
+    }
+    catch(error){
+        res.status(500).json({
+            message:error.message
         });
     }
 };
