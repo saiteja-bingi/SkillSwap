@@ -281,15 +281,19 @@ Live UI Update
 # Screenshots
 
 ## Home Page
+![alt text](image.png)
 Modern landing page with responsive design and skill-sharing workflow.
 
 ## Feed
+![alt text](image-1.png)
 Dynamic skill exchange feed with requests system and pagination.
 
 ## Dashboard
+![alt text](image-2.png)
 Centralized user dashboard for managing posts and requests.
 
 ## Real-Time Chat
+![alt text](image-3.png)
 Conversation-based live messaging system powered by Socket.IO.
 
 ---
