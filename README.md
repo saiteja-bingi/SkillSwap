@@ -1,8 +1,10 @@
 # SkillSwap Hub
 
-A modern full-stack MERN application where users can exchange skills, connect with others, send collaboration requests, and communicate through an integrated messaging system.
+SkillSwap Hub is a modern full-stack MERN application that enables users to exchange skills, connect with like-minded people, send collaboration requests, and communicate through a real-time messaging system powered by Socket.IO.
 
-## Live Demo
+---
+
+# Live Demo
 
 Frontend: https://skill-swap-ten-vert.vercel.app
 
@@ -16,42 +18,61 @@ Backend API: https://skillswap-zrev.onrender.com
 - User Registration & Login
 - JWT-based Authentication
 - Protected Routes
-- Persistent User Sessions
+- Persistent Login Sessions
 - Secure API Access
+- Auth Middleware Protection
 
-## Skill Feed
+---
+
+## Skill Feed System
 - Create Skill Swap Posts
-- Browse Community Posts
-- Skill Offered / Skill Wanted System
-- Dynamic Feed
+- Browse Community Skill Posts
+- Skill Offered / Skill Wanted Structure
+- Dynamic Feed Rendering
 - Pagination with Load More
-- Search & Filtering Support (Backend Ready)
+- Backend Search & Filtering Ready
 
-## Requests System
-- Send Skill Swap Requests
+---
+
+## Request System
+- Send Skill Collaboration Requests
 - Request Status Management
 - Accept / Reject Workflow
-- Request Tracking
+- Request Tracking Dashboard
 
-## Messaging System
-- Modern Chat Interface
-- User Conversations
-- Message Sending & Receiving
-- Clean Responsive Chat Layout
+---
 
-## Dashboard
+# Real-Time Messaging System
+
+## Socket.IO Powered Chat
+- Real-Time Private Messaging
+- Dynamic Conversations
+- Live Message Delivery
+- MongoDB Message Persistence
+- Fetch Old Messages
+- Optimistic UI Updates
+- Online Users Tracking
+- Conversation-Based Chat Architecture
+- Auto Scroll Latest Messages
+- Dynamic Conversation Sidebar
+
+---
+
+# Dashboard
 - Personalized User Dashboard
 - User Posts Management
 - Requests Overview
-- Quick Access Navigation
+- Quick Navigation Access
 
-## UI/UX
+---
+
+# UI / UX
 - Modern Dark Theme
-- Glassmorphism Design
 - Responsive Layout
-- Animated Interactive Components
-- Custom Scrollbars
-- Gradient Visual Effects
+- Minimal Chat Interface
+- Dynamic Chat Bubbles
+- Interactive Components
+- Smooth Scrolling Experience
 
 ---
 
@@ -62,8 +83,11 @@ Backend API: https://skillswap-zrev.onrender.com
 - React Router DOM
 - Axios
 - Context API
+- Socket.IO Client
 - CSS3
 - Vite
+
+---
 
 ## Backend
 - Node.js
@@ -71,9 +95,12 @@ Backend API: https://skillswap-zrev.onrender.com
 - MongoDB Atlas
 - Mongoose
 - JWT Authentication
+- Socket.IO
 - CORS
 
-## Deployment
+---
+
+# Deployment
 - Frontend: Vercel
 - Backend: Render
 - Database: MongoDB Atlas
@@ -92,6 +119,8 @@ SkillSwap/
 │   │   ├── pages/
 │   │   ├── routes/
 │   │   ├── services/
+│   │   │   ├── api.js
+│   │   │   └── socket.js
 │   │   └── App.jsx
 │   │
 │   └── public/
@@ -103,7 +132,10 @@ SkillSwap/
 │   │   ├── middleware/
 │   │   ├── models/
 │   │   ├── routes/
-│   │   └── app.js
+│   │   ├── socket/
+│   │   │   └── socket.js
+│   │   ├── app.js
+│   │   └── server.js
 │
 └── README.md
 ```
@@ -115,7 +147,7 @@ SkillSwap/
 ## Clone Repository
 
 ```bash
-git clone https://github.com/your-username/SkillSwap.git
+git clone https://github.com/saiteja-bingi/SkillSwap.git
 cd SkillSwap
 ```
 
@@ -128,7 +160,7 @@ cd server
 npm install
 ```
 
-Create a `.env` file inside `server/`
+Create `.env` file inside `server/`
 
 ```env
 MONGO_URI=your_mongodb_uri
@@ -136,7 +168,7 @@ JWT_SECRET=your_secret_key
 CLIENT_URL=http://localhost:5173
 ```
 
-Run Backend:
+Run Backend
 
 ```bash
 npm run dev
@@ -151,16 +183,55 @@ cd client
 npm install
 ```
 
-Create a `.env` file inside `client/`
+Create `.env` file inside `client/`
 
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
-Run Frontend:
+Run Frontend
 
 ```bash
 npm run dev
+```
+
+---
+
+# Socket.IO Architecture
+
+## Connection Flow
+
+```txt
+Frontend User
+↓
+Socket Connection
+↓
+register_user event
+↓
+Backend maps:
+onlineUsers[userId] = socket.id
+↓
+Private Messaging Enabled
+```
+
+---
+
+## Real-Time Message Flow
+
+```txt
+Sender UI
+↓
+socket.emit("private_message")
+↓
+Backend Socket Server
+↓
+MongoDB Message Save
+↓
+Receiver Socket Detection
+↓
+io.to(socketId).emit("receive_message")
+↓
+Live UI Update
 ```
 
 ---
@@ -175,6 +246,8 @@ npm run dev
 | POST | `/api/auth/login` | Login User |
 | GET | `/api/auth/profile` | Get User Profile |
 
+---
+
 ## Posts
 
 | Method | Endpoint | Description |
@@ -184,6 +257,8 @@ npm run dev
 | PUT | `/api/posts/:id` | Update Post |
 | DELETE | `/api/posts/:id` | Delete Post |
 
+---
+
 ## Requests
 
 | Method | Endpoint | Description |
@@ -191,42 +266,46 @@ npm run dev
 | POST | `/api/requests/:postId` | Send Request |
 | GET | `/api/requests` | Get Requests |
 
+---
+
 ## Chat
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/chat` | Get Conversations |
-| POST | `/api/chat/:id` | Send Message |
+| GET | `/api/chat/my-conversations` | Get User Conversations |
+| GET | `/api/chat/messages/:conversationId` | Get Conversation Messages |
+| POST | `/api/chat/:conversationId/message` | Send Message |
 
 ---
 
 # Screenshots
 
 ## Home Page
-Modern landing page with gradient glassmorphism design.
+Modern landing page with responsive design and skill-sharing workflow.
 
 ## Feed
-Dynamic skill exchange feed with pagination and request system.
+Dynamic skill exchange feed with requests system and pagination.
 
 ## Dashboard
-Centralized dashboard for posts and requests management.
+Centralized user dashboard for managing posts and requests.
 
-## Chat
-Modern messaging interface for user communication.
+## Real-Time Chat
+Conversation-based live messaging system powered by Socket.IO.
 
 ---
 
 # Future Improvements
 
-- Real-time Messaging with Socket.IO
-- Notifications System
-- User Profile Editing
-- Skill Search & Filters
-- Mobile Optimization Enhancements
-- Online User Status
 - Typing Indicators
-- Infinite Scrolling
+- Message Seen Status
+- Push Notifications
+- User Profile Editing
+- Advanced Skill Search
 - AI Skill Recommendations
+- Group Conversations
+- Media Sharing
+- Voice & Video Calling
+- Mobile App Version
 
 ---
 
@@ -239,10 +318,13 @@ This project helped in understanding:
 - JWT Authentication
 - Protected Routes
 - MongoDB Data Modeling
-- Frontend & Backend Integration
+- Socket.IO Real-Time Communication
+- Persistent vs Runtime State
+- Dynamic Conversation Architecture
+- React State-Driven UI
+- Optimistic UI Updates
 - Deployment Workflow
-- Pagination Systems
-- Modern UI Design Principles
+- Scalable Frontend & Backend Structure
 
 ---
 
@@ -252,11 +334,10 @@ Sai Teja
 
 B.Tech CSE (AI & ML)
 
-Passionate about Full-Stack Development, AI, and Scalable Web Applications.
+Passionate about Full-Stack Development, Real-Time Systems, AI, and Scalable Web Applications.
 
 ---
 
 # License
 
 This project is built for learning, development, and portfolio purposes.
-
