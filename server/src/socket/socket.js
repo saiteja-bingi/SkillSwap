@@ -9,7 +9,7 @@ export const initializeSocket = (server) => {
         cors: {
             origin: [
                 "http://localhost:5173",
-                "https://skill-swap-ten-vert.vercel.app"
+                "https://skill-swap-ten-fawn.vercel.app"
             ],
             methods: ["GET", "POST"]
         }

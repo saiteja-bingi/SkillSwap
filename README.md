@@ -6,7 +6,7 @@ SkillSwap Hub is a modern full-stack MERN application that enables users to exch
 
 # Live Demo
 
-Frontend: https://skill-swap-ten-vert.vercel.app
+Frontend: https://skill-swap-ten-fawn.vercel.app
 
 Backend API: https://skillswap-zrev.onrender.com
 
